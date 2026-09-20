@@ -14,7 +14,7 @@ public partial class FrmEmployeeDashboard : Form
 
     public FrmEmployeeDashboard()
     {
-        InitializeComponent();
+        InitializeComponent();AppTheme.Upgrade(this);
         lblHello.Text=$"☀  Xin chào, {SessionContext.FullName}!";
         foreach (var c in new[] { cBookings, cRevenue, cCustomers, cPending }) flpCards.Controls.Add(c);
         AppTheme.StyleGrid(gridToday);
@@ -61,6 +61,6 @@ FROM d OPTION(MAXRECURSION 7)");
                 .Select(r => (Convert.ToDateTime(r["TheDate"]).ToString("dd/MM"), Convert.ToDecimal(r["Value"]))).ToList();
             chart.Invalidate();
         }
-        catch (Exception ex) { MessageBox.Show(ex.Message); }
+        catch (Exception ex) { UiMsg.Error(ex.Message); }
     }
 }

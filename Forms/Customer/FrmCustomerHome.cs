@@ -8,7 +8,7 @@ public partial class FrmCustomerHome:Form
 {
     public FrmCustomerHome()
     {
-        InitializeComponent();
+        InitializeComponent();AppTheme.Upgrade(this);
         lblWelcome.Text=$"Xin chào, {SessionContext.FullName}!";
         hero.Cursor=Cursors.Hand;
         hero.Click+=(_,__)=>OpenBooking();
@@ -56,7 +56,7 @@ public partial class FrmCustomerHome:Form
                 flpFields.Controls.Add(card);
             }
         }
-        catch(Exception ex){MessageBox.Show(ex.Message,"Trang chủ",MessageBoxButtons.OK,MessageBoxIcon.Warning);}
+        catch(Exception ex){UiMsg.Warn(ex.Message, "Trang chủ");}
     }
 
     private Control MiniStat(string glyph,string title,string value,Color color)

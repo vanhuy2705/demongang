@@ -13,7 +13,7 @@ public partial class FrmAdminDashboard : Form
 
     public FrmAdminDashboard()
     {
-        InitializeComponent();
+        InitializeComponent();AppTheme.Upgrade(this);
         lblGreeting.Text = $"☀  Xin chào, {SessionContext.FullName}!";
         lblDate.Text = DateTime.Today.ToString("dddd, dd/MM/yyyy");
         foreach(var c in new[]{cRevenue,cBooking,cInvoice,cField}) flpCards.Controls.Add(c);
@@ -75,6 +75,6 @@ public partial class FrmAdminDashboard : Form
             chart.Items = dt.Rows.Cast<System.Data.DataRow>().OrderBy(r=>Convert.ToDateTime(r["TheDate"])).Select(r=>(Convert.ToDateTime(r["TheDate"]).ToString("dd/MM"),Convert.ToDecimal(r["Value"]))).ToList();
             chart.Invalidate();
         }
-        catch(Exception ex){ MessageBox.Show(ex.Message,"Dashboard",MessageBoxButtons.OK,MessageBoxIcon.Warning); }
+        catch(Exception ex){ UiMsg.Warn(ex.Message, "Dashboard"); }
     }
 }

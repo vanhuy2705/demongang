@@ -7,14 +7,23 @@ namespace QuanLyThueSanTheThao.Forms.Auth;
 public partial class FrmLogin : Form
 {
     private readonly AuthService _auth = new();
+    internal bool uFocus, uHover, pFocus, pHover;
 
     public FrmLogin()
     {
         InitializeComponent();
         btnLogin.Click += BtnLogin_Click;
         btnEye.Click += (_,__) => txtPassword.UseSystemPasswordChar = !txtPassword.UseSystemPasswordChar;
-        lnkForgot.Click += (_,__) => MessageBox.Show("Vui lòng liên hệ quản trị viên để đặt lại mật khẩu tài khoản.","Quên mật khẩu",MessageBoxButtons.OK,MessageBoxIcon.Information);
+        lnkForgot.Click += (_,__) => UiMsg.Info("Vui lòng liên hệ quản trị viên để đặt lại mật khẩu tài khoản.", "Quên mật khẩu");
         txtPassword.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) BtnLogin_Click(this, EventArgs.Empty); };
+        txtUsername.GotFocus += (_,__) => { uFocus = true; pnlUsername.Invalidate(); };
+        txtUsername.LostFocus += (_,__) => { uFocus = false; pnlUsername.Invalidate(); };
+        txtPassword.GotFocus += (_,__) => { pFocus = true; pnlPassword.Invalidate(); };
+        txtPassword.LostFocus += (_,__) => { pFocus = false; pnlPassword.Invalidate(); };
+        pnlUsername.MouseEnter += (_,__) => { uHover = true; pnlUsername.Invalidate(); };
+        pnlUsername.MouseLeave += (_,__) => { uHover = false; pnlUsername.Invalidate(); };
+        pnlPassword.MouseEnter += (_,__) => { pHover = true; pnlPassword.Invalidate(); };
+        pnlPassword.MouseLeave += (_,__) => { pHover = false; pnlPassword.Invalidate(); };
         var remembered = RememberMeStore.Load();
         txtUsername.Text = remembered.username;
         txtPassword.Text = remembered.password;
@@ -29,7 +38,7 @@ public partial class FrmLogin : Form
             var result = _auth.Login(txtUsername.Text, txtPassword.Text);
             if (!result.Success)
             {
-                MessageBox.Show(result.Message, "Đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                UiMsg.Warn(result.Message, "Đăng nhập");
                 return;
             }
 
@@ -50,8 +59,7 @@ public partial class FrmLogin : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show("Không thể kết nối CSDL. Hãy chạy file SQL của QuanLySanTheThaoDB và kiểm tra Data\\DatabaseConfig.cs.\n\n" + ex.Message,
-                "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            UiMsg.Error("Không thể kết nối CSDL. Hãy chạy file SQL của QuanLySanTheThaoDB và kiểm tra Data\\DatabaseConfig.cs.\n\n" + ex.Message, "Lỗi kết nối");
         }
         finally { btnLogin.Enabled = true; }
     }

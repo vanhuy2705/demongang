@@ -18,7 +18,7 @@ public partial class FrmMainShell : Form
 
     public FrmMainShell()
     {
-        InitializeComponent();
+        InitializeComponent();AppTheme.Upgrade(this);
         BuildShell();
         _clockTimer.Tick += (_,__) => UpdateClock();
         _clockTimer.Start();
@@ -256,7 +256,7 @@ public partial class FrmMainShell : Form
             Font = new Font("Segoe UI Semibold", admin ? 7.8F : 9.2F, FontStyle.Regular),
             ForeColor = admin ? Color.FromArgb(27,79,136) : (customer ? AppTheme.Text : Color.White),
             BackColor = admin ? Color.White : (customer ? Color.White : AppTheme.Sidebar),
-            HoverColor = admin ? Color.FromArgb(237,246,255) : (customer ? Color.FromArgb(237,249,245) : Color.FromArgb(14,58,65)),
+            HoverColor = admin ? Color.FromArgb(234,247,240) : (customer ? Color.FromArgb(237,249,245) : Color.FromArgb(14,58,65)),
             Radius = admin ? 8 : 10,
             Cursor = Cursors.Hand,
             Margin = admin ? new Padding(2, 0, 2, 0) : new Padding(0, 2, 0, 2),
@@ -278,18 +278,28 @@ public partial class FrmMainShell : Form
             prev.BackColor = admin ? Color.White : (customer ? Color.White : AppTheme.Sidebar);
             prev.ForeColor = admin ? Color.FromArgb(27,79,136) : (customer ? AppTheme.Text : Color.White);
             prev.Font = new Font("Segoe UI Semibold", admin ? 7.8F : 9.2F, FontStyle.Regular);
+            prev.IndicatorBar = null;
+            prev.Invalidate();
         }
         _activeButton = button;
         bool isAdmin = SessionContext.Role == "Admin";
-        if (isAdmin)
+        if (button is RoundedButton rb)
         {
-            button.BackColor = Color.FromArgb(44,128,245);
-            button.ForeColor = Color.White;
-        }
-        else
-        {
-            button.BackColor = SessionContext.Role == "Customer" ? Color.FromArgb(13,185,105) : Color.FromArgb(19,156,101);
-            button.ForeColor = Color.White;
+            if (isAdmin)
+            {
+                rb.BackColor = Color.FromArgb(234, 247, 240);
+                rb.ForeColor = AppTheme.AccentDark;
+                rb.IndicatorBar = AppTheme.Accent;
+                rb.IndicatorBottom = true;
+            }
+            else
+            {
+                rb.BackColor = SessionContext.Role == "Customer" ? Color.FromArgb(16, 172, 99) : Color.FromArgb(19, 156, 101);
+                rb.ForeColor = Color.White;
+                rb.IndicatorBar = Color.FromArgb(120, 255, 255, 255);
+                rb.IndicatorBottom = false;
+            }
+            rb.Invalidate();
         }
         button.Font = new Font("Segoe UI Semibold", isAdmin ? 7.8F : 9.2F, FontStyle.Bold);
     }

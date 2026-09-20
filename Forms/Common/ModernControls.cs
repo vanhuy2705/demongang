@@ -53,29 +53,47 @@ public class RoundedPanel : Panel
         path.CloseFigure();
         return path;
     }
+
+    /// <summary>Tạo Region bo tròn cho control ngoài (dùng trong Designer).</summary>
+    internal static Region RegionFor(Control c, int radius)
+    {
+        if (c.Width < 8 || c.Height < 8) return new Region(new Rectangle(0, 0, 1, 1));
+        using var path = CreateRoundPath(new Rectangle(0, 0, c.Width - 1, c.Height - 1), radius);
+        return new Region(path);
+    }
 }
 
 public class RoundedButton : Button
 {
     public int Radius { get; set; } = 12;
     public Color HoverColor { get; set; } = Color.Empty;
+    /// <summary>Bar nhấn màu nhấn ở cạnh trái/cánh dưới thể hiện trạng thái active.</summary>
+    public Color? IndicatorBar { get; set; }
+    public bool IndicatorBottom { get; set; }
+    private bool _pressed;
     private Color _baseColor;
 
     public RoundedButton()
     {
+        SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
+                 ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
         FlatStyle = FlatStyle.Flat;
         FlatAppearance.BorderSize = 0;
         Cursor = Cursors.Hand;
         UseVisualStyleBackColor = false;
         Resize += (_, _) => UpdateRegion();
-        MouseEnter += (_, _) => { _baseColor = BackColor; if (HoverColor != Color.Empty) BackColor = HoverColor; };
-        MouseLeave += (_, _) => { if (_baseColor != Color.Empty) BackColor = _baseColor; };
+        MouseEnter += (_, _) => { _baseColor = BackColor; if (HoverColor != Color.Empty) BackColor = HoverColor; Invalidate(); };
+        MouseLeave += (_, _) => { _pressed = false; if (_baseColor != Color.Empty) BackColor = _baseColor; Invalidate(); };
+        MouseDown += (_, e) => { if (e.Button == MouseButtons.Left) { _pressed = true; Invalidate(); } };
+        MouseUp += (_, _) => { _pressed = false; Invalidate(); };
+        EnabledChanged += (_, _) => Invalidate();
     }
 
     private void UpdateRegion()
     {
         if (Width <= 2 || Height <= 2) return;
         using var path = RoundedPanel.CreateRoundPath(new Rectangle(0, 0, Width, Height), Radius);
+        Region?.Dispose();
         Region = new Region(path);
     }
 
@@ -83,6 +101,60 @@ public class RoundedButton : Button
     {
         base.OnCreateControl();
         UpdateRegion();
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Parent?.BackColor ?? BackColor);
+        var r = new Rectangle(0, 0, Width - 1, Height - 1);
+        if (r.Width <= 1 || r.Height <= 1) return;
+        using var path = RoundedPanel.CreateRoundPath(r, Radius);
+        using (var b = new SolidBrush(BackColor)) g.FillPath(b, path);
+        if (_pressed)
+        {
+            using var pb = new SolidBrush(Color.FromArgb(28, 0, 0, 0));
+            g.FillPath(pb, path);
+        }
+        if (IndicatorBar is Color bar)
+        {
+            using var bb = new SolidBrush(bar);
+            if (IndicatorBottom)
+            {
+                var br = new Rectangle((Width - Math.Min(46, Width - 14)) / 2, Height - 5, Math.Min(46, Width - 14), 4);
+                using var bp = RoundedPanel.CreateRoundPath(br, 2);
+                g.FillPath(bb, bp);
+            }
+            else
+            {
+                var br = new Rectangle(0, (Height - Math.Min(26, Height - 10)) / 2, 4, Math.Min(26, Height - 10));
+                using var bp = RoundedPanel.CreateRoundPath(br, 2);
+                g.FillPath(bb, bp);
+            }
+        }
+        var fore = Enabled ? ForeColor : Color.FromArgb(150, ForeColor);
+        using var tb = new SolidBrush(fore);
+        using var sf = new StringFormat
+        {
+            Alignment = TextAlign switch
+            {
+                ContentAlignment.MiddleLeft or ContentAlignment.TopLeft or ContentAlignment.BottomLeft => StringAlignment.Near,
+                ContentAlignment.MiddleRight or ContentAlignment.TopRight or ContentAlignment.BottomRight => StringAlignment.Far,
+                _ => StringAlignment.Center
+            },
+            LineAlignment = TextAlign switch
+            {
+                ContentAlignment.TopCenter or ContentAlignment.TopLeft or ContentAlignment.TopRight => StringAlignment.Near,
+                ContentAlignment.BottomCenter or ContentAlignment.BottomLeft or ContentAlignment.BottomRight => StringAlignment.Far,
+                _ => StringAlignment.Center
+            }
+        };
+        var textRect = (RectangleF)ClientRectangle;
+        if (Padding != Padding.Empty)
+            textRect = new RectangleF(textRect.X + Padding.Left, textRect.Y + Padding.Top,
+                textRect.Width - Padding.Horizontal, textRect.Height - Padding.Vertical);
+        g.DrawString(Text, Font, tb, textRect, sf);
     }
 }
 
@@ -444,5 +516,339 @@ public sealed class CustomerBannerPanel : RoundedPanel
         using var t1=new Font("Segoe UI Semibold",18F,FontStyle.Bold);using var t2=new Font("Segoe UI Semibold",20F,FontStyle.Bold);using var sub=new Font("Segoe UI",8.5F);using var green=new SolidBrush(Color.FromArgb(38,229,128));using var soft=new SolidBrush(Color.FromArgb(225,241,246));
         g.DrawString("Sân thể thao chất lượng",t1,white,28,23);g.DrawString("Trải nghiệm tuyệt vời!",t2,green,28,51);g.DrawString("Đặt sân dễ dàng · Thanh toán nhanh · Nhiều ưu đãi hấp dẫn",sub,soft,30,88);
         using var btn=new SolidBrush(Color.FromArgb(27,202,117));using var path=RoundedPanel.CreateRoundPath(new Rectangle(30,112,125,34),17);g.FillPath(btn,path);using var bf=new Font("Segoe UI Semibold",8.5F,FontStyle.Bold);g.DrawString("Đặt sân ngay  →",bf,white,47,121);
+    }
+}
+
+// ==================== PRO INPUT KIT ====================
+
+/// <summary>
+/// Host bo tròn cho TextBox: viền mảnh, focus đổi màu nhấn + glow mềm.
+/// TextBox gốc được nhúng bên trong (viền none) nên mọi tham chiếu .Text/.Clear()... vẫn hoạt động.
+/// </summary>
+public class TextField : RoundedPanel
+{
+    public TextBox Inner { get; }
+    private bool _focused;
+
+    public TextField() : this(new TextBox()) { }
+
+    public TextField(TextBox inner)
+    {
+        Inner = inner;
+        Radius = 10;
+        BorderColor = AppTheme.InputBorder;
+        BackColor = Color.White;
+        ResizeRedraw = true;
+        Padding = new Padding(12, 0, 12, 0);
+
+        inner.BorderStyle = BorderStyle.None;
+        inner.BackColor = Color.White;
+        inner.Dock = DockStyle.Fill;
+        inner.Margin = Padding.Empty;
+        inner.GotFocus += (_, _) => { _focused = true; Invalidate(); };
+        inner.LostFocus += (_, _) => { _focused = false; Invalidate(); };
+        inner.TextChanged += (_, _) => Invalidate();
+        Controls.Add(inner);
+    }
+
+    protected override void OnResize(EventArgs eventargs)
+    {
+        if (!Inner.Multiline)
+        {
+            int h = Math.Max(36, Height);
+            if (Height != h) { Height = h; return; }
+        }
+        base.OnResize(eventargs);
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Parent?.BackColor ?? AppTheme.Background);
+        var r = new Rectangle(0, 0, Width - 1, Height - 1);
+        if (r.Width <= 2 || r.Height <= 2) return;
+        using var path = CreateRoundPath(r, Radius);
+        Region?.Dispose();
+        Region = new Region(path);
+
+        Color border = _focused ? AppTheme.Accent : (Inner.Enabled ? (HoverBorder() ?? AppTheme.InputBorder) : Color.FromArgb(228, 236, 241));
+        using (var b = new SolidBrush(Inner.Enabled ? BackColor : Color.FromArgb(246, 249, 251)))
+            g.FillPath(b, path);
+        if (_focused)
+        {
+            using var glow = new Pen(Color.FromArgb(52, AppTheme.Accent), 3.5f);
+            var gr = new Rectangle(-1, -1, Width + 1, Height + 1);
+            using var gp = CreateRoundPath(gr, Radius + 1);
+            g.DrawPath(glow, gp);
+        }
+        using var p = new Pen(border, _focused ? 1.6f : 1f);
+        g.DrawPath(p, path);
+    }
+
+    protected virtual Color? HoverBorder() => _hover ? Color.FromArgb(178, 205, 218) : null;
+    private bool _hover;
+    protected override void OnMouseEnter(EventArgs e) { base.OnMouseEnter(e); _hover = true; Invalidate(); }
+    protected override void OnMouseLeave(EventArgs e) { base.OnMouseLeave(e); _hover = false; Invalidate(); }
+}
+
+/// <summary>Ô tìm kiếm: icon kính lúp + nút xóa nhanh.</summary>
+public sealed class SearchField : TextField
+{
+    private readonly Label _icon = new() { Text = "⌕", AutoSize = false, Size = new Size(26, 34), TextAlign = ContentAlignment.MiddleCenter, ForeColor = AppTheme.Muted, Font = new Font("Segoe UI Symbol", 12.5F), Cursor = Cursors.Default };
+    private readonly Label _clear = new() { Text = "✕", AutoSize = false, Size = new Size(26, 34), TextAlign = ContentAlignment.MiddleCenter, ForeColor = Color.FromArgb(150, 168, 182), Font = new Font("Segoe UI", 9.5F), Cursor = Cursors.Hand, Visible = false };
+
+    public SearchField() : this(new TextBox()) { }
+    public SearchField(TextBox inner) : base(inner)
+    {
+        Padding = new Padding(34, 0, 30, 0);
+        Controls.Add(_icon);
+        Controls.Add(_clear);
+        _icon.Location = new Point(8, (Height - 34) / 2);
+        _clear.Location = new Point(Width - 32, (Height - 34) / 2);
+        Resize += (_, _) => { _icon.Top = (Height - 34) / 2; _clear.Top = (Height - 34) / 2; _clear.Left = Width - 32; };
+        _clear.Click += (_, _) => { Inner.Text = ""; Inner.Focus(); };
+        Inner.TextChanged += (_, _) => _clear.Visible = Inner.Text.Length > 0;
+    }
+}
+
+/// <summary>
+/// Host bo tròn cho ComboBox: che viền vuông gốc bằng mask ring, mục dropdown vẽ lại theo theme.
+/// </summary>
+public class SelectField : RoundedPanel
+{
+    public ComboBox Inner { get; }
+    private bool _focused;
+    private readonly Panel _mask = new();
+
+    public SelectField() : this(new ComboBox()) { }
+
+    public SelectField(ComboBox inner)
+    {
+        Inner = inner;
+        Radius = 10;
+        BorderColor = AppTheme.InputBorder;
+        BackColor = Color.White;
+        ResizeRedraw = true;
+        Padding = new Padding(4, 3, 4, 3);
+
+        inner.FlatStyle = FlatStyle.Flat;
+        inner.BackColor = Color.White;
+        inner.ForeColor = AppTheme.Text;
+        inner.Font = new Font("Segoe UI", 9.2F);
+        inner.Dock = DockStyle.Fill;
+        inner.Margin = Padding.Empty;
+        try
+        {
+            inner.DrawMode = DrawMode.OwnerDrawFixed;
+            inner.ItemHeight = 22;
+            inner.DrawItem += Combo_DrawItem;
+        }
+        catch { }
+        inner.GotFocus += (_, _) => { _focused = true; Invalidate(); };
+        inner.LostFocus += (_, _) => { _focused = false; Invalidate(); };
+        inner.DropDownClosed += (_, _) => Invalidate();
+
+        _mask.Enabled = false;
+        _mask.BackColor = Color.White;
+        _mask.Dock = DockStyle.Fill;
+        _mask.Paint += Mask_Paint;
+        _mask.Resize += (_, _) => BuildMaskRegion();
+
+        Controls.Add(inner);
+        Controls.Add(_mask);
+    }
+
+    private void BuildMaskRegion()
+    {
+        try
+        {
+            var rect = new Rectangle(0, 0, _mask.Width - 1, _mask.Height - 1);
+            if (rect.Width < 4 || rect.Height < 4) { _mask.Region = null; return; }
+            using var outer = RoundedPanel.CreateRoundPath(rect, 8);
+            using var region = new Region(outer);
+            rect.Inflate(-1, -1);
+            using var innerPath = RoundedPanel.CreateRoundPath(rect, 7);
+            region.Exclude(innerPath);
+            _mask.Region = region;
+        }
+        catch { _mask.Region = null; }
+    }
+
+    private void Mask_Paint(object? sender, PaintEventArgs e)
+    {
+        BuildMaskRegion();
+        if (_mask.Region == null) return;
+        using var b = new SolidBrush(Color.White);
+        e.Graphics.FillRegion(b, _mask.Region);
+    }
+
+    private void Combo_DrawItem(object? sender, DrawItemEventArgs e)
+    {
+        if (e.Index < 0) return;
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        bool selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+        using (var bg = new SolidBrush(selected ? Color.FromArgb(233, 248, 241) : Color.White))
+            g.FillRectangle(bg, e.Bounds);
+        if (selected)
+        {
+            using var accent = new SolidBrush(AppTheme.Accent);
+            g.FillRectangle(accent, e.Bounds.X + 2, e.Bounds.Y + 3, 3, e.Bounds.Height - 6);
+        }
+        string text = "";
+        try { text = Inner.GetItemText(Inner.Items[e.Index]); } catch { }
+        using var tb = new SolidBrush(selected ? AppTheme.AccentDark : AppTheme.Text);
+        var f = new Font("Segoe UI", e.Index >= 0 ? 9.2F : 9.2F, selected ? FontStyle.Bold : FontStyle.Regular);
+        g.DrawString(text, f, tb, e.Bounds.X + 12, e.Bounds.Y + 3);
+        f.Dispose();
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Parent?.BackColor ?? AppTheme.Background);
+        var r = new Rectangle(0, 0, Width - 1, Height - 1);
+        if (r.Width <= 2 || r.Height <= 2) return;
+        using var path = CreateRoundPath(r, Radius);
+        Region?.Dispose();
+        Region = new Region(path);
+
+        using (var b = new SolidBrush(Inner.Enabled ? BackColor : Color.FromArgb(246, 249, 251)))
+            g.FillPath(b, path);
+        var border = _focused ? AppTheme.Accent : (Inner.Enabled ? Color.FromArgb(200, 216, 226) : Color.FromArgb(228, 236, 241));
+        if (_focused)
+        {
+            using var glow = new Pen(Color.FromArgb(52, AppTheme.Accent), 3.5f);
+            var gr = new Rectangle(-1, -1, Width + 1, Height + 1);
+            using var gp = CreateRoundPath(gr, Radius + 1);
+            g.DrawPath(glow, gp);
+        }
+        using var p = new Pen(border, _focused ? 1.6f : 1f);
+        g.DrawPath(p, path);
+    }
+}
+
+/// <summary>Host bo tròn cho DateTimePicker.</summary>
+public class DateField : RoundedPanel
+{
+    public DateTimePicker Inner { get; }
+    private bool _focused;
+    private readonly Panel _mask = new();
+
+    public DateField() : this(new DateTimePicker()) { }
+
+    public DateField(DateTimePicker inner)
+    {
+        Inner = inner;
+        Radius = 10;
+        BorderColor = AppTheme.InputBorder;
+        BackColor = Color.White;
+        ResizeRedraw = true;
+        Padding = new Padding(6, 3, 6, 3);
+
+        inner.BackColor = Color.White;
+        inner.ForeColor = AppTheme.Text;
+        inner.Font = new Font("Segoe UI", 9.2F);
+        inner.CalendarForeColor = AppTheme.Text;
+        inner.CalendarMonthBackground = Color.White;
+        inner.Dock = DockStyle.Fill;
+        inner.Margin = Padding.Empty;
+        inner.GotFocus += (_, _) => { _focused = true; Invalidate(); };
+        inner.LostFocus += (_, _) => { _focused = false; Invalidate(); };
+
+        _mask.Enabled = false;
+        _mask.BackColor = Color.White;
+        _mask.Dock = DockStyle.Fill;
+        _mask.Paint += Mask_Paint;
+        _mask.Resize += (_, _) => BuildMaskRegion();
+
+        Controls.Add(inner);
+        Controls.Add(_mask);
+    }
+
+    private void BuildMaskRegion()
+    {
+        try
+        {
+            var rect = new Rectangle(0, 0, _mask.Width - 1, _mask.Height - 1);
+            if (rect.Width < 4 || rect.Height < 4) { _mask.Region = null; return; }
+            using var outer = RoundedPanel.CreateRoundPath(rect, 8);
+            using var region = new Region(outer);
+            rect.Inflate(-1, -1);
+            using var innerPath = RoundedPanel.CreateRoundPath(rect, 7);
+            region.Exclude(innerPath);
+            _mask.Region = region;
+        }
+        catch { _mask.Region = null; }
+    }
+
+    private void Mask_Paint(object? sender, PaintEventArgs e)
+    {
+        BuildMaskRegion();
+        if (_mask.Region == null) return;
+        using var b = new SolidBrush(Color.White);
+        e.Graphics.FillRegion(b, _mask.Region);
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Parent?.BackColor ?? AppTheme.Background);
+        var r = new Rectangle(0, 0, Width - 1, Height - 1);
+        if (r.Width <= 2 || r.Height <= 2) return;
+        using var path = CreateRoundPath(r, Radius);
+        Region?.Dispose();
+        Region = new Region(path);
+
+        using (var b = new SolidBrush(Inner.Enabled ? BackColor : Color.FromArgb(246, 249, 251)))
+            g.FillPath(b, path);
+        var border = _focused ? AppTheme.Accent : (Inner.Enabled ? Color.FromArgb(200, 216, 226) : Color.FromArgb(228, 236, 241));
+        if (_focused)
+        {
+            using var glow = new Pen(Color.FromArgb(52, AppTheme.Accent), 3.5f);
+            var gr = new Rectangle(-1, -1, Width + 1, Height + 1);
+            using var gp = CreateRoundPath(gr, Radius + 1);
+            g.DrawPath(glow, gp);
+        }
+        using var p = new Pen(border, _focused ? 1.6f : 1f);
+        g.DrawPath(p, path);
+    }
+}
+
+/// <summary>Chip trạng thái nhỏ (pill) dùng ngoài lưới.</summary>
+public sealed class PillBadge : Control
+{
+    public string Value { get; set; } = "";
+    public Color Base { get; set; } = AppTheme.Success;
+
+    public PillBadge()
+    {
+        DoubleBuffered = true;
+        Height = 24;
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Parent?.BackColor ?? Color.White);
+        string text = Value;
+        using var f = new Font("Segoe UI Semibold", 8.3F, FontStyle.Bold);
+        var sz = g.MeasureString(text, f);
+        int w = (int)sz.Width + 24;
+        if (w > Width) w = Width;
+        var rect = new Rectangle((Width - w) / 2, (Height - 22) / 2, w, 22);
+        using var path = RoundedPanel.CreateRoundPath(rect, 11);
+        using var bg = new SolidBrush(Color.FromArgb(28, Base));
+        g.FillPath(bg, path);
+        using var p = new Pen(Color.FromArgb(70, Base), 1f);
+        g.DrawPath(p, path);
+        using var dot = new SolidBrush(Base);
+        g.FillEllipse(dot, rect.X + 9, rect.Y + rect.Height / 2 - 2, 4.5f, 4.5f);
+        using var tb = new SolidBrush(ControlPaint.Dark(Base));
+        g.DrawString(text, f, tb, rect.X + 16, rect.Y + 3);
     }
 }
