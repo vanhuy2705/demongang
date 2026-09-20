@@ -17,7 +17,7 @@ WHERE f.DangHoatDong=1 ORDER BY ft.TenLoaiSan,f.TenSan;");
 SELECT f.SanID,f.MaSan,f.TenSan,ft.TenLoaiSan,f.GiaMoiGio
 FROM SanTheThao f
 INNER JOIN LoaiSan ft ON ft.LoaiSanID=f.LoaiSanID
-WHERE f.DangHoatDong=1 AND f.TrangThai <> N'Bảo trì'
+WHERE f.DangHoatDong=1 AND f.TrangThai NOT IN (N'Bảo trì', N'Maintenance', N'Inactive', N'Ngừng hoạt động')
 AND (@TypeID IS NULL OR f.LoaiSanID=@TypeID)
 AND NOT EXISTS(
     SELECT 1 FROM DatSan b WITH (READCOMMITTEDLOCK)
