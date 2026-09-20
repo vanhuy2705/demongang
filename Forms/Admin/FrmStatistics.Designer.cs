@@ -1,0 +1,8 @@
+#nullable enable
+namespace QuanLyThueSanTheThao.Forms.Admin;
+partial class FrmStatistics
+{
+    private System.ComponentModel.IContainer? components=null;private FlowLayoutPanel cards=null!;private TableLayoutPanel layout=null!;private QuanLyThueSanTheThao.Forms.Common.SimpleBarChart chart=null!;private DataGridView grid=null!;private DateTimePicker dtFrom=null!,dtTo=null!;private Button btnLoad=null!;
+    protected override void Dispose(bool disposing){if(disposing&&components!=null)components.Dispose();base.Dispose(disposing);}
+    private void InitializeComponent(){cards=new FlowLayoutPanel();layout=new TableLayoutPanel();chart=new QuanLyThueSanTheThao.Forms.Common.SimpleBarChart();grid=new DataGridView();dtFrom=new DateTimePicker();dtTo=new DateTimePicker();btnLoad=new Button();SuspendLayout();var top=new Panel{Dock=DockStyle.Top,Height=56,BackColor=Color.White};dtFrom.Format=dtTo.Format=DateTimePickerFormat.Short;dtFrom.Location=new Point(12,13);dtTo.Location=new Point(162,13);btnLoad.Text="Xem báo cáo";btnLoad.Location=new Point(312,10);btnLoad.Size=new Size(120,36);top.Controls.AddRange(new Control[]{dtFrom,dtTo,btnLoad});cards.Dock=DockStyle.Top;cards.Height=112;cards.WrapContents=false;cards.AutoScroll=true;layout.Dock=DockStyle.Fill;layout.ColumnCount=2;layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,40));layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,60));chart.Dock=DockStyle.Fill;chart.BackColor=Color.White;grid.Dock=DockStyle.Fill;layout.Controls.Add(chart,0,0);layout.Controls.Add(grid,1,0);Controls.Add(layout);Controls.Add(cards);Controls.Add(top);BackColor=Color.FromArgb(243,249,248);ResumeLayout(false);}
+}

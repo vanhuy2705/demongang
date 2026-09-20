@@ -1,0 +1,8 @@
+#nullable enable
+namespace QuanLyThueSanTheThao.Forms.Admin;
+partial class FrmBookingSchedule
+{
+    private System.ComponentModel.IContainer? components=null;private Panel top=null!;private DateTimePicker dtDate=null!;private ComboBox cboStatus=null!;private TextBox txtSearch=null!;private Button btnRefresh=null!,btnCancel=null!,btnComplete=null!;private DataGridView grid=null!;
+    protected override void Dispose(bool disposing){if(disposing&&components!=null)components.Dispose();base.Dispose(disposing);}
+    private void InitializeComponent(){top=new Panel();dtDate=new DateTimePicker();cboStatus=new ComboBox();txtSearch=new TextBox();btnRefresh=new Button();btnCancel=new Button();btnComplete=new Button();grid=new DataGridView();SuspendLayout();top.Dock=DockStyle.Top;top.Height=60;top.BackColor=Color.White;top.Padding=new Padding(10);dtDate.Format=DateTimePickerFormat.Short;dtDate.Location=new Point(10,14);dtDate.Width=140;cboStatus.Location=new Point(160,14);cboStatus.Width=150;cboStatus.DropDownStyle=ComboBoxStyle.DropDownList;txtSearch.PlaceholderText="Tìm mã đơn/khách/sân...";txtSearch.Location=new Point(320,14);txtSearch.Width=240;btnRefresh.Text="Làm mới";btnRefresh.Location=new Point(570,11);btnRefresh.Size=new Size(90,36);btnComplete.Text="Hoàn tất";btnComplete.Location=new Point(670,11);btnComplete.Size=new Size(90,36);btnCancel.Text="Hủy đơn";btnCancel.Location=new Point(770,11);btnCancel.Size=new Size(90,36);top.Controls.AddRange(new Control[]{dtDate,cboStatus,txtSearch,btnRefresh,btnComplete,btnCancel});grid.Dock=DockStyle.Fill;Controls.Add(grid);Controls.Add(top);BackColor=Color.FromArgb(243,249,248);ResumeLayout(false);}
+}

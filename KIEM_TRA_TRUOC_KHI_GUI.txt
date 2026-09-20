@@ -1,0 +1,22 @@
+KIỂM TRA TRƯỚC KHI GỬI - BẢN GIAO DIỆN THEO ẢNH MẪU
+====================================================
+
+[OK] Target: net8.0-windows + UseWindowsForms=true
+[OK] DatabaseConfig: localhost\\SQLEXPRESS / QuanLySanTheThaoDB
+[OK] Giữ nguyên nghiệp vụ đặt sân, chống trùng giờ, hóa đơn, voucher, khuyến mãi, QR.
+[OK] Admin chuyển sang layout top navigation + dashboard sáng theo ảnh mẫu.
+[OK] Nhân viên chuyển sang sidebar navy/green + dashboard theo ảnh mẫu.
+[OK] Khách hàng chuyển sang layout SportField sáng + banner/card sân theo ảnh mẫu.
+[OK] Login chuyển sang giao diện SportField navy/green hiện đại.
+[OK] Thanh toán QR chuyển sang card layout; số tiền QR vẫn lấy từ số tiền còn phải trả.
+[OK] Menu phân quyền giữ nguyên chức năng.
+[OK] Trạng thái chính hiển thị tiếng Việt.
+[OK] Kiểm tra tham chiếu new Frm...(): không thiếu lớp Form.
+[OK] Kiểm tra bảng được truy vấn trong C#: đều tồn tại trong CSDL tiếng Việt.
+[OK] Không còn DataTable.AsEnumerable() trong mã ứng dụng.
+[OK] Kiểm tra cấu trúc dấu ngoặc/chuỗi C#: không phát hiện lỗi tĩnh.
+
+GIỚI HẠN KIỂM TRA:
+Môi trường đóng gói hiện tại không có Windows/.NET 8 SDK/SQL Server nên không thể
+thực hiện Visual Studio Rebuild hoặc chạy WinForms thật. Cần Rebuild trên Windows
+sau khi chạy script SQL để xác nhận runtime trên máy đích.

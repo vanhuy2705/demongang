@@ -1,0 +1,82 @@
+QUẢN LÝ THUÊ SÂN THỂ THAO - WINDOWS FORMS .NET 8
+===================================================
+
+1. CÔNG NGHỆ
+- Windows Forms .NET 8 (net8.0-windows)
+- SQL Server Express / SQL Server 2022
+- Microsoft.Data.SqlClient
+- QRCoder
+- CSDL: QuanLySanTheThaoDB
+
+2. KẾT NỐI CSDL
+Ứng dụng kết nối qua SQL Server instance:
+  Server=localhost\\SQLEXPRESS;
+  Database=QuanLySanTheThaoDB;
+  Trusted_Connection=True;
+  TrustServerCertificate=True;
+
+File cấu hình: Data\\DatabaseConfig.cs
+
+Thư mục file MDF/LDF được script SQL tạo tại:
+  C:\\Program Files\\Microsoft SQL Server\\MSSQL16.SQLEXPRESS\\MSSQL\\DATA
+
+Lưu ý: WinForms kết nối bằng Server + Database, KHÔNG dùng AttachDbFilename.
+
+3. GIAO DIỆN ĐÃ THIẾT KẾ LẠI THEO ẢNH MẪU
+- Admin: giao diện sáng, thanh điều hướng ngang, KPI cards, timeline lịch sân,
+  trạng thái sân dạng donut, biểu đồ doanh thu, đặt sân gần đây và thao tác nhanh.
+- Nhân viên: sidebar xanh navy, logo SportField, avatar, KPI cards, lịch đặt sân,
+  biểu đồ doanh thu, lịch mini, thao tác nhanh và banner thể thao.
+- Khách hàng: sidebar sáng, banner SportField, danh mục loại sân, card sân,
+  thông tin cá nhân, voucher và thống kê cá nhân.
+- Đăng nhập: bố cục thể thao navy/xanh lá, card đăng nhập bo góc, nhớ mật khẩu.
+- Thanh toán: dialog hiện đại, QR và thông tin chuyển khoản; QR dùng đúng số tiền
+  còn phải thanh toán của booking.
+
+Các màn hình CRUD còn lại được áp dụng AppTheme dùng chung để đồng bộ màu sắc,
+button, textbox, combobox, grid, card và khoảng cách với hệ thống mới.
+
+4. PHÂN QUYỀN
+Admin:
+  Tổng quan, Loại sân, Quản lý sân, Khách hàng, Đặt sân, Lịch đặt sân,
+  Hóa đơn, Voucher, Khuyến mãi, Tài khoản, Nhân viên, Thống kê, Cấu hình.
+
+Nhân viên:
+  Trang chủ, Đặt sân, Lịch đặt sân, Hóa đơn, Khách hàng, Thông tin sân,
+  Loại sân, Thống kê, Tài khoản.
+
+Khách hàng:
+  Trang chủ, Đặt sân, Lịch sử đặt sân, Hóa đơn của tôi,
+  Voucher của tôi, Thông tin cá nhân.
+
+5. TÀI KHOẢN MẪU
+Admin:      admin / admin123
+Nhân viên:  staff / staff123
+Khách hàng: customer / customer123
+
+6. TRÌNH TỰ CHẠY
+Bước 1: Chạy file QuanLySanTheThaoDB_TiengViet.sql bằng SSMS.
+Bước 2: Mở QuanLyThueSanTheThao.sln bằng Visual Studio 2022.
+Bước 3: Đảm bảo workload .NET desktop development và .NET 8 SDK đã cài.
+Bước 4: Build -> Clean Solution.
+Bước 5: Build -> Rebuild Solution.
+Bước 6: F5.
+
+7. THANH TOÁN QR
+- Số tiền QR = số tiền còn phải thanh toán của hóa đơn.
+- Nội dung chuyển khoản gắn mã đơn đặt sân để đối soát.
+- QR/chuyển khoản được ghi nhận ở trạng thái chờ xác nhận.
+- Nhân viên/Admin xác nhận tiền đã về thì hóa đơn mới chuyển trạng thái thanh toán.
+- Thông tin ngân hàng chỉnh tại màn Cấu hình, không phải sửa code.
+
+8. KIỂM TRA NGUỒN TRƯỚC KHI ĐÓNG GÓI
+Đã thực hiện kiểm tra tĩnh:
+- Không có tham chiếu Form bị thiếu trong các lệnh new Frm...().
+- Các lớp partial Designer chính có file code tương ứng.
+- Không còn DataTable.AsEnumerable() gây lỗi suy luận generic trước đây.
+- Cân bằng dấu ngoặc và chuỗi trong toàn bộ file C#.
+- Tên bảng được mã C# sử dụng đều tồn tại trong script CSDL tiếng Việt.
+
+Môi trường đóng gói không phải Windows và không có .NET SDK/SQL Server nên không thể
+thực hiện F5/SQL execution thực tế ở đây. Nếu Visual Studio trên máy đích báo lỗi build,
+hãy gửi Error List kèm File + Line để xử lý chính xác.
