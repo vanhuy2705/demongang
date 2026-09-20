@@ -52,6 +52,8 @@ public sealed class DashboardCard : RoundedPanel
         _sub.Location = new Point(72, 70);
 
         Controls.AddRange(new Control[] { _accentLine, _icon, _title, _value, _sub });
+        MouseEnter += (_, _) => { BorderColor = Color.FromArgb(168, 210, 199); Invalidate(); };
+        MouseLeave += (_, _) => { BorderColor = Color.FromArgb(220, 233, 239); Invalidate(); };
     }
 
     public void SetValue(string value, string sub = "")

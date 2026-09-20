@@ -77,6 +77,7 @@ public partial class FrmMainShell : Form
         if (SessionContext.Role == "Admin") BuildAdminShell();
         else BuildSideShell(SessionContext.Role == "Customer");
         foreach (var def in GetMenuItems()) AddMenuButton(def);
+        AppTheme.Smooth(this);
     }
 
     private void BuildAdminShell()
@@ -128,8 +129,16 @@ public partial class FrmMainShell : Form
         _pageTitle = new Label { Visible = false };
         _clock = new Label { Visible = false };
 
+        var accentStrip = new Panel { Dock = DockStyle.Top, Height = 3, BackColor = AppTheme.Accent };
+        accentStrip.Paint += (_, e) =>
+        {
+            using var br = new System.Drawing.Drawing2D.LinearGradientBrush(accentStrip.ClientRectangle, AppTheme.Accent, AppTheme.Accent2, 0f);
+            e.Graphics.FillRectangle(br, accentStrip.ClientRectangle);
+        };
+
         root.Controls.Add(_content);
         root.Controls.Add(top);
+        root.Controls.Add(accentStrip);
     }
 
     private void BuildSideShell(bool customer)
@@ -285,6 +294,7 @@ public partial class FrmMainShell : Form
         bool isAdmin = SessionContext.Role == "Admin";
         if (button is RoundedButton rb)
         {
+            Fx.StopColor(rb);
             if (isAdmin)
             {
                 rb.BackColor = Color.FromArgb(234, 247, 240);
@@ -299,6 +309,7 @@ public partial class FrmMainShell : Form
                 rb.IndicatorBar = Color.FromArgb(120, 255, 255, 255);
                 rb.IndicatorBottom = false;
             }
+            rb.SyncBaseColor();
             rb.Invalidate();
         }
         button.Font = new Font("Segoe UI Semibold", isAdmin ? 7.8F : 9.2F, FontStyle.Bold);
@@ -326,6 +337,7 @@ public partial class FrmMainShell : Form
         _content.Controls.Add(form);
         _content.ResumeLayout();
         form.Show();
+        Fx.Settle(form);
     }
 
     private void UpdateClock()

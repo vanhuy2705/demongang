@@ -71,6 +71,6 @@ public partial class FrmCustomerHome:Form
     private void OpenBooking()
     {
         using var f=new FrmBooking(customerMode:true){Text="Đặt sân",StartPosition=FormStartPosition.CenterParent,Size=new Size(Math.Min(1060,Width-60),Math.Min(720,Height-60))};
-        AppTheme.ApplyToForm(f,"Customer");f.ShowDialog(this);LoadData();
+        AppTheme.ApplyToForm(f,"Customer");f.ShowDialogFx(this);LoadData();
     }
 }

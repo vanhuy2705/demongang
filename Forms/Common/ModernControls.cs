@@ -82,8 +82,8 @@ public class RoundedButton : Button
         Cursor = Cursors.Hand;
         UseVisualStyleBackColor = false;
         Resize += (_, _) => UpdateRegion();
-        MouseEnter += (_, _) => { _baseColor = BackColor; if (HoverColor != Color.Empty) BackColor = HoverColor; Invalidate(); };
-        MouseLeave += (_, _) => { _pressed = false; if (_baseColor != Color.Empty) BackColor = _baseColor; Invalidate(); };
+        MouseEnter += (_, _) => { _baseColor = BackColor; if (HoverColor != Color.Empty) Fx.ToColor(this, HoverColor); };
+        MouseLeave += (_, _) => { _pressed = false; if (_baseColor != Color.Empty) Fx.ToColor(this, _baseColor); };
         MouseDown += (_, e) => { if (e.Button == MouseButtons.Left) { _pressed = true; Invalidate(); } };
         MouseUp += (_, _) => { _pressed = false; Invalidate(); };
         EnabledChanged += (_, _) => Invalidate();
@@ -96,6 +96,9 @@ public class RoundedButton : Button
         Region?.Dispose();
         Region = new Region(path);
     }
+
+    /// <summary>Ghi nhận màu nền hiện tại làm màu gốc (gọi sau khi đổi màu bằng code).</summary>
+    public void SyncBaseColor() => _baseColor = BackColor;
 
     protected override void OnCreateControl()
     {

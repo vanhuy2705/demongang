@@ -30,7 +30,7 @@ public partial class FrmEmployeeDashboard : Form
         AddQuick("▱  Voucher",AppTheme.Warning,()=>OpenDialog(new FrmVouchers(),"Voucher"),1,1);
     }
     private void AddQuick(string text,Color color,Action action,int col,int row){var b=new RoundedButton{Dock=DockStyle.Fill,Margin=new Padding(5),Text=text,BackColor=color,ForeColor=Color.White,Font=new Font("Segoe UI Semibold",8.4F,FontStyle.Bold),Radius=10,HoverColor=ControlPaint.Dark(color,.08f)};b.Click+=(_,__)=>action();quickGrid.Controls.Add(b,col,row);}
-    private void OpenDialog(Form f,string title){f.Text=title;f.StartPosition=FormStartPosition.CenterParent;f.Size=new Size(Math.Min(1100,Width-70),Math.Min(720,Height-70));AppTheme.ApplyToForm(f,"Employee");f.ShowDialog(this);LoadData();}
+    private void OpenDialog(Form f,string title){f.Text=title;f.StartPosition=FormStartPosition.CenterParent;f.Size=new Size(Math.Min(1100,Width-70),Math.Min(720,Height-70));AppTheme.ApplyToForm(f,"Employee");f.ShowDialogFx(this);LoadData();}
 
     private void LoadData()
     {

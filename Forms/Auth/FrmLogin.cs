@@ -12,6 +12,25 @@ public partial class FrmLogin : Form
     public FrmLogin()
     {
         InitializeComponent();
+        AppTheme.Smooth(this);
+        Opacity = 0;
+        Shown += (_,__) =>
+        {
+            Fx.FadeIn(this, 220);
+            var target = loginCard.Top;
+            loginCard.Top = target + 18;
+            var t = new System.Windows.Forms.Timer { Interval = 16 };
+            int i = 0;
+            t.Tick += (_, _) =>
+            {
+                i++;
+                float k = Math.Min(1f, i / 12f);
+                float e = 1f - (1f - k) * (1f - k);
+                loginCard.Top = target + (int)Math.Round(18 * (1 - e));
+                if (k >= 1) { t.Stop(); t.Dispose(); }
+            };
+            t.Start();
+        };
         btnLogin.Click += BtnLogin_Click;
         btnEye.Click += (_,__) => txtPassword.UseSystemPasswordChar = !txtPassword.UseSystemPasswordChar;
         lnkForgot.Click += (_,__) => UiMsg.Info("Vui lòng liên hệ quản trị viên để đặt lại mật khẩu tài khoản.", "Quên mật khẩu");

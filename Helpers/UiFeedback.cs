@@ -189,6 +189,7 @@ internal sealed class UiDialog : Form
         ShowInTaskbar = false;
         BackColor = Color.White;
         DoubleBuffered = true;
+        Opacity = 0;
         KeyPreview = true;
         KeyDown += (_, e) =>
         {
@@ -262,6 +263,7 @@ internal sealed class UiDialog : Form
     protected override void OnShown(EventArgs e)
     {
         base.OnShown(e);
+        Fx.FadeIn(this, 150);
         int y = Height - 52;
         int x = Width - 24;
         if (_buttons == MessageBoxButtons.YesNo)

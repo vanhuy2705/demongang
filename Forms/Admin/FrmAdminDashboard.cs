@@ -44,7 +44,7 @@ public partial class FrmAdminDashboard : Form
         form.StartPosition = FormStartPosition.CenterParent;
         form.Size = new Size(Math.Min(1180, Width-80), Math.Min(760, Height-80));
         AppTheme.ApplyToForm(form,"Admin");
-        form.ShowDialog(this);
+        form.ShowDialogFx(this);
         LoadDashboard();
     }
 

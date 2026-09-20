@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using System.Reflection;
 using QuanLyThueSanTheThao.Forms.Common;
 
 namespace QuanLyThueSanTheThao.Helpers;
@@ -145,6 +146,7 @@ public static class AppTheme
     {
         if (form.Tag is string s && s.Contains("upgraded")) return;
         form.Tag = (form.Tag?.ToString() ?? "").Trim() + " upgraded";
+        Smooth(form);
         WrapInputs(form);
         foreach (var c in Descendants(form))
         {
@@ -167,6 +169,27 @@ public static class AppTheme
                     break;
             }
         }
+    }
+
+    /// <summary>Bật double-buffer cho toàn bộ control để vẽ mượt, không giật.</summary>
+    public static void Smooth(Control root)
+    {
+        EnableDouble(root);
+        foreach (var c in Descendants(root)) EnableDouble(c);
+    }
+
+    private static void EnableDouble(Control c)
+    {
+        try { typeof(Control).GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(c, true); }
+        catch { }
+    }
+
+    /// <summary>Mở hộp thoại với hiệu ứng fade-in mượt.</summary>
+    public static DialogResult ShowDialogFx(this Form form, IWin32Window? owner = null)
+    {
+        form.Opacity = 0;
+        form.Shown += (_, _) => Fx.FadeIn(form, 150);
+        return owner == null ? form.ShowDialog() : form.ShowDialog(owner);
     }
 
     private static IEnumerable<Control> Descendants(Control root)
@@ -279,6 +302,18 @@ public static class AppTheme
         if (grid.Tag as string == "enhanced") return;
         grid.Tag = "enhanced";
         StyleGrid(grid);
+        EnableDouble(grid);
+
+        // trạng thái trống chuyên nghiệp
+        grid.Paint += (_, e) =>
+        {
+            if (grid.Rows.Count > 0) return;
+            var rect = new Rectangle(0, grid.ColumnHeadersHeight, grid.ClientSize.Width,
+                Math.Max(1, grid.ClientSize.Height - grid.ColumnHeadersHeight));
+            TextRenderer.DrawText(e.Graphics, "Chưa có dữ liệu để hiển thị",
+                new Font("Segoe UI", 9.5F, FontStyle.Italic), rect, Color.FromArgb(155, 170, 184),
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+        };
 
         grid.CellMouseEnter += (_, e) =>
         {
