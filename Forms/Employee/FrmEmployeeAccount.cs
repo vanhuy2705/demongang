@@ -19,9 +19,12 @@ public sealed class FrmEmployeeAccount : Form
     {
         BackColor=AppTheme.Background;
         var card=new RoundedPanel{Dock=DockStyle.Top,Height=430,Radius=16,BorderColor=AppTheme.Border,Padding=new Padding(26),Margin=new Padding(6)};
-        var title=new Label{Text="Thông tin tài khoản",AutoSize=true,Font=new Font("Segoe UI Semibold",18F,FontStyle.Bold),ForeColor=AppTheme.Text,Location=new Point(26,22)};
-        var sub=new Label{Text="Cập nhật thông tin cá nhân và bảo mật tài khoản nhân viên.",AutoSize=true,Font=new Font("Segoe UI",8.7F),ForeColor=AppTheme.Muted,Location=new Point(28,58)};
-        card.Controls.AddRange(new Control[]{title,sub});
+        var badge=new Label{Text="♟",AutoSize=false,Size=new Size(40,40),Font=new Font("Segoe UI Symbol",13F),ForeColor=Color.White,BackColor=AppTheme.Accent2,TextAlign=ContentAlignment.MiddleCenter,Location=new Point(26,22)};
+        badge.Region=RoundedPanel.RegionFor(badge,12);
+        var title=new Label{Text="Thông tin cá nhân",AutoSize=true,Font=new Font("Segoe UI Semibold",13.5F,FontStyle.Bold),ForeColor=AppTheme.Text,Location=new Point(78,26)};
+        var sub=new Label{Text="Cập nhật thông tin cá nhân và bảo mật tài khoản nhân viên.",AutoSize=true,Font=new Font("Segoe UI",8.2F),ForeColor=AppTheme.Muted,Location=new Point(79,52)};
+        var sep=new Panel{BackColor=Color.FromArgb(238,244,248),Location=new Point(26,84),Width=640,Height=1};
+        card.Controls.AddRange(new Control[]{badge,title,sub,sep});
         int y=104;
         AddField(card,"Mã nhân viên",txtCode,28,ref y);txtCode.ReadOnly=true;
         AddField(card,"Họ tên",txtName,28,ref y);

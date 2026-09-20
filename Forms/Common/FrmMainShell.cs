@@ -99,7 +99,7 @@ public partial class FrmMainShell : Form
 
         var brand = new Panel { Dock = DockStyle.Left, Width = 205, BackColor = Color.White };
         var logo = new IconBadge { Glyph = "▦", AccentColor = AppTheme.Accent2, Size = new Size(44,44), Location = new Point(2,10) };
-        var brandTitle = new Label { Text = "THUÊ SÂN", AutoSize = true, Font = new Font("Segoe UI Semibold", 15F, FontStyle.Bold), ForeColor = Color.FromArgb(22,75,132), Location = new Point(52,8) };
+        var brandTitle = new Label { Text = "THUÊ SÂN", AutoSize = true, Font = new Font("Segoe UI Semibold", 15F, FontStyle.Bold), ForeColor = Color.FromArgb(18,53,78), Location = new Point(52,8) };
         var brandSub = new Label { Text = "Đặt sân dễ dàng · Chơi hết mình", AutoSize = true, Font = new Font("Segoe UI", 7.2F), ForeColor = AppTheme.Muted, Location = new Point(53,37) };
         brand.Controls.AddRange(new Control[] { logo, brandTitle, brandSub });
 
