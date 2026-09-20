@@ -11,7 +11,7 @@ internal static class Program
         ApplicationConfiguration.Initialize();
         Application.SetDefaultFont(new Font("Segoe UI", 10F));
         Application.ThreadException += (_, e) =>
-            MessageBox.Show(e.Exception.Message, "Lỗi ứng dụng", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            UiMsg.Error(e.Exception.Message, "Lỗi ứng dụng");
 
         Application.Run(new FrmLogin());
     }
